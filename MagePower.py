@@ -21,7 +21,7 @@ highlight_color = (0, 200, 200)
 text_color = (255, 255, 255)
 
 # Resurse audio
-collision_sound = pygame.mixer.Sound("assets/Music//collision.wav")
+collision_sound = pygame.mixer.Sound("assets/Music/collision.wav")
 powerup_sound = pygame.mixer.Sound("assets/Music/powerup.wav")
 game_over_sound = pygame.mixer.Sound("assets/Music/gameover.wav")
 destroy_powerup_sound = pygame.mixer.Sound("assets/Music/destroy.wav")

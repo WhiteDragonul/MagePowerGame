@@ -6,7 +6,7 @@ from tkinter import Tk, messagebox
 # Inițializare Pygame
 pygame.mixer.pre_init(44100, -16, 2, 512)
 pygame.init()
-
+pygame.mouse.set_cursor(pygame.cursors.broken_x)
 # Dimensiunea ferestrei
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
@@ -47,7 +47,7 @@ enemy_zigzag_image = pygame.transform.scale(enemy_zigzag_image, (75, 75))
 powerup_image = pygame.image.load("assets/Characters/power_up.png")
 powerup_image = pygame.transform.scale(powerup_image, (75, 75))
 
-destroy_all_powerup_image = pygame.image.load("assets/Characters/destroy_all.jpg")
+destroy_all_powerup_image = pygame.image.load("assets/Characters/destroy_all_power_up_image.png")
 destroy_all_powerup_image = pygame.transform.scale(destroy_all_powerup_image, (75, 75))
 
 heart_image = pygame.image.load("assets/Characters/heart.webp")
@@ -93,11 +93,14 @@ enemy_types = [
 # Leaderboard
 leaderboard_file = "leaderboard.txt"
 def load_leaderboard():
+    pygame.mouse.set_visible(True)
     try:
         with open(leaderboard_file, "r") as file:
             return [int(line.strip()) for line in file.readlines()]
     except FileNotFoundError:
+        pygame.mouse.set_visible(False)
         return []
+    
 
 def save_to_leaderboard(score):
     scores = load_leaderboard()
@@ -127,7 +130,7 @@ def settings_menu():
     current_difficulty_index = difficulty_levels.index(difficulty)
 
     while True:
-        screen.fill(background_color)
+        screen.blit(main_menu_background, (0, 0))
 
         # Titlul meniului de setări
         title_text = font.render("Settings", True, text_color)
@@ -242,6 +245,7 @@ def main_menu():
 
 # Leaderboard
 def show_leaderboard():
+    screen.blit(main_menu_background, (0, 0))
     scores = load_leaderboard()
     back_button_rect = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT - 150, 200, 50)
 
@@ -274,7 +278,9 @@ def show_leaderboard():
 
 # Meniu de pauză
 def pause_menu():
+    screen.blit(main_menu_background, (0, 0))
     paused = True
+    pygame.mixer.music.stop()
     while paused:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -303,6 +309,16 @@ def pause_menu():
         pygame.display.flip()
         pygame.time.Clock().tick(30)
 
+#Tutorial Game
+def tutorial_game():
+            global score
+            root = Tk()
+            root.withdraw()
+            messagebox.showinfo("Congrats!","You completed the tutorial!")
+            root.destroy()
+            main_menu()
+
+
 # Joc propriu-zis
 def game_loop():
     pygame.mixer.music.load("assets/Music/gameplay.mp3")
@@ -326,13 +342,13 @@ def game_loop():
     difficulty_timer = pygame.time.get_ticks()
     spawn_timer = 0
     screen.blit(game_menu_background, (0, 0))
+    game_timer=100
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a] and square_x > 0:
             square_x -= square_speed
@@ -443,14 +459,19 @@ def game_loop():
 
         if current_time - difficulty_timer >= 10000:
             enemy_speed += 0.2
-            spawn_rate = max(40, spawn_rate - 3)
+            spawn_rate = max(40, spawn_rate - 5)
             difficulty_timer = current_time
 
+        if score==100:
+            tutorial_game()
+            
         screen.blit(player_image, (square_x, square_y))
         for enemy in enemies:
             screen.blit(enemy["image"], (enemy["x"], enemy["y"]))
         for powerup in life_powerups:
             screen.blit(powerup_image, (powerup["x"], powerup["y"]))
+        for powerup in destroy_all_powerups:
+            screen.blit(destroy_all_powerup_image,(powerup["x"],powerup["y"]))
 
         score_text = font.render(f"Score: {score}", True, text_color)
         screen.blit(score_text, (10, 10))
